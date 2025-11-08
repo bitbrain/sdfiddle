@@ -2,6 +2,10 @@
 
 SDFiddle is a browser-based tool for creating 3D graphics with signed distance functions (SDFs). Write shader code and see the results rendered in real-time.
 
+# [👉 OPEN APP](https://bitbra.in/sdfiddle/)
+
+[![screenshot](screenshot.webp)](https://bitbra.in/sdfiddle/)
+
 ## Features
 
 - Live preview with WebGL rendering
@@ -9,6 +13,8 @@ SDFiddle is a browser-based tool for creating 3D graphics with signed distance f
 - Export to PNG, JPEG, or WebP
 - Customizable canvas size and background
 - No installation required
+
+
 
 ## Getting Started
 
