@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SDFiddle — Shader How-To</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 4rem;
+        line-height: 1.65;
+        font-size: 1.05rem;
+      }
+
+      header {
+        margin-bottom: 2.5rem;
+        text-align: center;
+      }
+
+      header h1 {
+        margin-bottom: 0.5rem;
+        font-size: 2.25rem;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--text-muted);
+      }
+
+      section + section {
+        margin-top: 2.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-muted);
+        padding-bottom: 0.5rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.4rem;
+      }
+
+      pre {
+        background: rgba(255, 255, 255, 0.04);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        overflow-x: auto;
+      }
+
+      code {
+        font-family: "Fira Code", "Source Code Pro", Menlo, Consolas, monospace;
+        font-size: 0.95rem;
+      }
+
+      a.back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: var(--accent-400);
+        margin-top: 2.5rem;
+      }
+
+      ul {
+        margin: 0.5rem 0 1rem;
+        padding-left: 1.25rem;
+      }
+
+      li + li {
+        margin-top: 0.4rem;
+      }
+    </style>
+  </head>
+  <body class="theme-dark">
+    <main>
+      <header>
+        <h1>SDFiddle Shader How-To</h1>
+        <p>Guidance for writing signed distance field shaders inside SDFiddle.</p>
+      </header>
+
+      <section>
+        <h2>Core Concepts</h2>
+        <p>
+          SDFiddle renders a full-screen quad and passes the standard ShaderToy-style uniforms into your fragment
+          shader. Your job is to write a function that returns a signed distance to the closest surface at each pixel.
+        </p>
+        <ul>
+          <li><code>vec2 fragCoord</code> contains the pixel coordinate being shaded.</li>
+          <li><code>vec2 iResolution</code> is the viewport size in pixels.</li>
+          <li><code>float iTime</code> is the elapsed time in seconds since the preview started.</li>
+          <li><code>vec4 iMouse</code> stores the pointer position and button state.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Shader Structure</h2>
+        <p>The default template creates an entry point compatible with the live preview and export pipeline.</p>
+        <pre><code>float sdf(vec3 p) {
+  // Return the signed distance for point p
+  return length(p) - 0.5;
+}
+
+vec3 estimateNormal(vec3 p) {
+  const vec2 e = vec2(1.0, -1.0) * 0.0005;
+  return normalize(vec3(
+    e.xyy * sdf(p + e.xyy),
+    e.yyx * sdf(p + e.yyx),
+    e.yxy * sdf(p + e.yxy),
+    e.xxx * sdf(p + e.xxx)
+  ));
+}
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;
+  // Raymarch, shade, and output color into fragColor
+}</code></pre>
+        <p>
+          Keep <code>mainImage</code> intact—SDFiddle wires it into the preview canvas and exported shader bundle. Feel
+          free to add helpers or include files in the editor as needed.
+        </p>
+      </section>
+
+      <section>
+        <h2>Uniforms and Inputs</h2>
+        <h3>Time and Animation</h3>
+        <p>
+          Use <code>iTime</code> for smooth looping animation tied to seconds. For beat-synced or discrete events, derive
+          state from <code>floor(iTime)</code> or mod operations.
+        </p>
+
+        <h3>Mouse Interaction</h3>
+        <p>
+          <code>iMouse.xy</code> gives the last pointer position in pixels, while <code>iMouse.zw</code> flips to non-zero
+          values while the primary button is pressed. Normalize by <code>iResolution.xy</code> when mapping to UV space.
+        </p>
+      </section>
+
+      <section>
+        <h2>Signed Distance Patterns</h2>
+        <h3>Primitives</h3>
+        <ul>
+          <li><code>sdSphere(p, r)</code> returns <code>length(p) - r</code>.</li>
+          <li><code>sdBox(p, b)</code> combines <code>length(max(abs(p) - b, 0.0))</code> with the inside distance.</li>
+          <li><code>sdRoundBox(p, b, r)</code> expands edges with a rounded profile.</li>
+        </ul>
+
+        <h3>Boolean Ops</h3>
+        <ul>
+          <li>Union: <code>min(d1, d2)</code></li>
+          <li>Intersection: <code>max(d1, d2)</code></li>
+          <li>Subtraction: <code>max(-d1, d2)</code></li>
+        </ul>
+
+        <h3>Transform Helpers</h3>
+        <ul>
+          <li>Translate: call <code>sdf(p - offset)</code>.</li>
+          <li>Repeat: <code>p = mod(p, cellSize) - 0.5 * cellSize;</code></li>
+          <li>Bend/Twist: modify the axis with sine/cosine before sampling the primitive.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Debugging Tips</h2>
+        <ul>
+          <li>Use a stepped palette based on distance to visualize ray steps or gradients.</li>
+          <li>Animate the camera path with <code>iTime</code> to explore the volume.</li>
+          <li>Export frequently—SDFiddle bundles your shader and settings for reproducible results.</li>
+        </ul>
+        <p>
+          If the preview goes black, check for NaNs, extremely high step counts, or missing <code>fragColor</code>
+          assignment.
+        </p>
+      </section>
+
+      <a class="back-link" href="index.html">&#8592; Back to SDFiddle</a>
+    </main>
+  </body>
+</html>
+
+
