@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="fediverse:creator" content="@bitbraindev@mastodon.gamedev.place" />
     <title>SDFiddle — Shader How-To</title>
     <link rel="stylesheet" href="css/styles.css" />
     <style>
@@ -141,6 +142,38 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
           <code>iMouse.xy</code> gives the last pointer position in pixels, while <code>iMouse.zw</code> flips to non-zero
           values while the primary button is pressed. Normalize by <code>iResolution.xy</code> when mapping to UV space.
         </p>
+      </section>
+
+      <section>
+        <h2>Supported Syntax &amp; Limits</h2>
+        <p>
+          SDFiddle compiles your shader as a WebGL 1.0 fragment program targeting
+          <a href="https://www.khronos.org/registry/OpenGL/specs/es/2.0/GLSL_ES_Specification_1.00.pdf">GLSL ES 1.00 (OpenGL ES 2.0)</a>.
+          Follow the capabilities in the
+          <a href="https://www.khronos.org/registry/webgl/specs/latest/1.0/">current WebGL 1.0 specification</a> to ensure portability across browsers.
+        </p>
+        <ul>
+          <li>
+            Omit <code>#version</code> directives. WebGL 1.0 requires the default 1.00 profile, and higher version strings will fail to compile.
+          </li>
+          <li>
+            SDFiddle injects <code>precision highp float;</code>, a <code>varying vec2 vUv;</code>, and uniforms named <code>iResolution</code>,
+            <code>iTime</code>, <code>iBackground</code>, and <code>iSampleOffset</code> before your code. When preview antialiasing is enabled, it also defines
+            <code>SDF_AA_ON</code> so you can conditionally branch per sample.
+          </li>
+          <li>
+            Keep loop bounds and array indices static when possible. WebGL 1.0 enforces GLSL ES 1.00 restrictions such as compile-time
+            evaluable loop limits (e.g. <code>for (int i = 0; i &lt; 128; ++i)</code>) and tight limits on uniform array indexing.
+          </li>
+          <li>
+            Advanced stages like geometry, tessellation, or compute shaders are unavailable under WebGL 1.0. Stick with fragment-stage techniques
+            that write to <code>gl_FragColor</code>.
+          </li>
+          <li>
+            All core GLSL ES math/library intrinsics are available. For a quick lookup, see the
+            <a href="https://registry.khronos.org/OpenGL-Refpages/es2.0/">OpenGL ES 2.0 reference pages</a>.
+          </li>
+        </ul>
       </section>
 
       <section>

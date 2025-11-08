@@ -2,14 +2,16 @@ import { ShaderEditor } from "./components/ShaderEditor.js";
 import { PreviewCanvas } from "./components/PreviewCanvas.js";
 import { OptionsPanel } from "./components/OptionsPanel.js";
 import { ExportPanel } from "./components/ExportPanel.js";
+import { HeaderBar } from "./components/HeaderBar.js";
+import { FooterBar } from "./components/FooterBar.js";
 import { defaultShader } from "./utils/defaultShader.js";
 import { parseShader } from "./utils/parser.js";
 
 const appRoot = document.getElementById("app-root");
 
 const initialOptions = {
-  width: 512,
-  height: 512,
+  width: 1024,
+  height: 1024,
   layout: "split",
   backgroundHex: "#000000",
   backgroundAlpha: 0,
@@ -42,10 +44,16 @@ const optionsPanel = new OptionsPanel({
   onLayoutChange: handleLayoutChange,
 });
 
+const headerBar = new HeaderBar();
+document.body.insertBefore(headerBar.element, appRoot);
+
 const exportPanel = new ExportPanel();
-exportPanel.setSnapshotProvider(() => preview.snapshotToBlob());
+exportPanel.setSnapshotProvider((options) => preview.snapshotToBlob(options));
 
 appRoot.append(editor.element, preview.element, optionsPanel.element, exportPanel.element);
+
+const footerBar = new FooterBar();
+document.body.appendChild(footerBar.element);
 
 // Initial render
 const initialParse = parseShader(defaultShader);

@@ -41,6 +41,66 @@ body::after {
   opacity: 0.15;
 }
 
+.site-header {
+  margin: 4px clamp(24px, 5vw, 72px) 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.site-logo {
+  width: min(220px, 28vw);
+  height: min(220px, 28vw);
+  object-fit: contain;
+}
+
+.site-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.site-title-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.site-title-tagline {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.site-footer {
+  margin: 32px clamp(24px, 5vw, 72px) 40px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: rgba(245, 247, 255, 0.35);
+}
+
+.site-footer-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 200ms var(--transition-snappy);
+}
+
+.site-footer-link:hover,
+.site-footer-link:focus-visible {
+  color: #a29bfe;
+}
+
+.site-footer-credits {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .app-root {
   display: grid;
   grid-template-columns: minmax(320px, 480px) minmax(360px, 1fr);
@@ -368,14 +428,15 @@ body::after {
 }
 
 .button-primary {
-  background: linear-gradient(135deg, rgba(108, 92, 231, 0.9), rgba(214, 48, 49, 0.75));
+  background: linear-gradient(135deg, #6d90d3, #597fbe);
   color: #fff;
-  box-shadow: 0 12px 30px -20px rgba(108, 92, 231, 1);
+  border-color: rgba(89, 127, 190, 0.4);
+  box-shadow: 0 12px 30px -20px rgba(89, 127, 190, 0.65);
 }
 
 .button-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 38px -18px rgba(108, 92, 231, 0.85);
+  box-shadow: 0 18px 38px -18px rgba(89, 127, 190, 0.85);
 }
 
 .button-primary:active {
@@ -411,6 +472,22 @@ body::after {
   min-height: 20px;
 }
 
+.export-panel .export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.export-panel .help-text {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.export-panel .help-text[data-disabled="true"] {
+  opacity: 0.6;
+}
+
 .fade-in {
   animation: fadeIn 420ms var(--transition-snappy);
 }
@@ -436,6 +513,15 @@ body::after {
 }
 
 @media (max-width: 960px) {
+  .site-header {
+    margin: 18px clamp(14px, 6vw, 24px) -8px;
+  }
+
+  .site-logo {
+    width: min(160px, 45vw);
+    height: min(160px, 45vw);
+  }
+
   .app-root {
     grid-template-columns: 1fr;
     padding: 24px clamp(16px, 6vw, 32px);
