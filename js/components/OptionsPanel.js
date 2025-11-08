@@ -5,6 +5,10 @@ const SIZE_PRESETS = [
   { label: "512 × 512", width: 512, height: 512 },
   { label: "1024 × 1024", width: 1024, height: 1024 },
   { label: "1280 × 720", width: 1280, height: 720 },
+  { label: "1920 × 1080", width: 1920, height: 1080 },
+  { label: "2048 × 2048", width: 2048, height: 2048 },
+  { label: "3840 × 2160", width: 3840, height: 2160 },
+  { label: "4096 × 4096", width: 4096, height: 4096 },
 ];
 
 export class OptionsPanel {
@@ -41,7 +45,7 @@ export class OptionsPanel {
       attrs: {
         type: "number",
         min: "64",
-        max: "2048",
+        max: "4096",
         step: "1",
       },
     });
@@ -50,7 +54,7 @@ export class OptionsPanel {
       attrs: {
         type: "number",
         min: "64",
-        max: "2048",
+        max: "4096",
         step: "1",
       },
     });
@@ -188,8 +192,8 @@ export class OptionsPanel {
   }
 
   #emitOptions() {
-    const width = Math.max(64, Math.min(2048, parseInt(this.widthInput.value, 10) || this.options.width));
-    const height = Math.max(64, Math.min(2048, parseInt(this.heightInput.value, 10) || this.options.height));
+    const width = Math.max(64, Math.min(4096, parseInt(this.widthInput.value, 10) || this.options.width));
+    const height = Math.max(64, Math.min(4096, parseInt(this.heightInput.value, 10) || this.options.height));
     const backgroundHex = this.backgroundPicker.value || "#000000";
     const backgroundAlpha = (parseInt(this.alphaSlider.value, 10) || 0) / 100;
     const antialias = this.antialiasToggle.checked;

@@ -42,17 +42,68 @@ body::after {
 }
 
 .site-header {
-  margin: 4px clamp(24px, 5vw, 72px) 0;
-  padding: 0;
+  margin: 4px 0 0;
+  padding: 0 clamp(24px, 5vw, 72px);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  flex-wrap: wrap;
 }
 
 .site-logo {
   width: min(220px, 28vw);
   height: min(220px, 28vw);
   object-fit: contain;
+}
+
+.demo-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.18), rgba(108, 92, 231, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(20px) saturate(130%);
+  margin-left: auto;
+}
+
+.demo-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(245, 247, 255, 0.65);
+  font-weight: 600;
+}
+
+.demo-select {
+  appearance: none;
+  padding: 10px 36px 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(6, 8, 15, 0.7) url("data:image/svg+xml,%3Csvg viewBox='0 0 12 7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 7L0 0h12z' fill='%23ffffff'/%3E%3C/svg%3E") no-repeat right 12px center;
+  background-size: 12px 7px;
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 160ms var(--transition-snappy),
+    box-shadow 160ms var(--transition-snappy),
+    background-color 160ms var(--transition-snappy);
+}
+
+.demo-select:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+.demo-select option {
+  background: #06080f;
+  color: var(--color-text);
 }
 
 .site-title {
@@ -170,7 +221,8 @@ body::after {
   padding: 18px 20px;
   tab-size: 2;
   overflow: auto;
-  white-space: pre;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .code-highlights {
@@ -178,6 +230,7 @@ body::after {
   inset: 0;
   pointer-events: none;
   color: var(--color-text);
+  margin: 0;
   padding: 18px 20px;
   font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", monospace;
   font-size: 14px;
@@ -289,6 +342,9 @@ body::after {
 
 .preview-panel canvas {
   width: 100%;
+  max-width: 512px;
+  align-self: center;
+  margin: 0 auto;
   border-radius: var(--radius-md);
   background: repeating-conic-gradient(
       rgba(255, 255, 255, 0.04) 0deg 30deg,

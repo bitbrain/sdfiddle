@@ -4,7 +4,12 @@ import { OptionsPanel } from "./components/OptionsPanel.js";
 import { ExportPanel } from "./components/ExportPanel.js";
 import { HeaderBar } from "./components/HeaderBar.js";
 import { FooterBar } from "./components/FooterBar.js";
-import { defaultShader } from "./utils/defaultShader.js";
+import {
+  customShaderTemplate,
+  defaultDemoId,
+  defaultShader,
+  shaderDemos,
+} from "./utils/defaultShader.js";
 import { parseShader } from "./utils/parser.js";
 
 const appRoot = document.getElementById("app-root");
@@ -18,10 +23,13 @@ const initialOptions = {
   antialias: true,
 };
 
+const defaultDemo = shaderDemos.find((demo) => demo.id === defaultDemoId) ?? shaderDemos[0];
+
 const state = {
   shaderSource: defaultShader,
   parseOk: true,
   options: { ...initialOptions },
+  selectedDemoId: defaultDemo?.id ?? null,
 };
 
 const editor = new ShaderEditor({
@@ -44,7 +52,11 @@ const optionsPanel = new OptionsPanel({
   onLayoutChange: handleLayoutChange,
 });
 
-const headerBar = new HeaderBar();
+const headerBar = new HeaderBar({
+  demos: shaderDemos,
+  initialDemoId: defaultDemo?.id,
+  onDemoChange: handleDemoChange,
+});
 document.body.insertBefore(headerBar.element, appRoot);
 
 const exportPanel = new ExportPanel();
@@ -60,7 +72,7 @@ const initialParse = parseShader(defaultShader);
 if (initialParse.ok) {
   preview.updateShader(defaultShader);
   editor.setStatus("Compiled", "ok");
-  editor.setLog("Shader ready.");
+  editor.setLog(`Loaded demo: ${defaultDemo?.label ?? "Shader"}.`);
   preview.setStatus("Rendering", "ok");
 } else {
   editor.setStatus("Parse issue", "error");
@@ -68,8 +80,10 @@ if (initialParse.ok) {
   preview.setStatus("Awaiting fix", "error");
 }
 
-function handleShaderChange(source, parseResult) {
+function handleShaderChange(source, parseResult, meta = {}) {
+  const { demoId } = meta;
   state.shaderSource = source;
+  syncDemoSelection(source, demoId);
   if (!parseResult?.ok) {
     editor.setStatus("Parse issue", "error");
     editor.setLog(parseResult.diagnostics.map((d) => `• ${d.message}`).join("\n"), "error");
@@ -80,6 +94,42 @@ function handleShaderChange(source, parseResult) {
 
   state.parseOk = true;
   preview.updateShader(source);
+}
+
+function handleDemoChange(demoId) {
+  if (!demoId) {
+    const parseResult = parseShader(customShaderTemplate);
+    editor.setValue(customShaderTemplate);
+    handleShaderChange(customShaderTemplate, parseResult, { demoId: null });
+
+    if (parseResult.ok) {
+      editor.setStatus("Compiled", "ok");
+      editor.setLog("Loaded custom shader template.");
+      preview.setStatus("Rendering", "ok");
+    } else {
+      editor.setStatus("Parse issue", "error");
+      editor.setLog(parseResult.diagnostics.map((d) => `• ${d.message}`).join("\n"), "error");
+      preview.setStatus("Waiting for valid shader", "error");
+    }
+    return;
+  }
+
+  const demo = shaderDemos.find((item) => item.id === demoId);
+  if (!demo) return;
+
+  const parseResult = parseShader(demo.source);
+  editor.setValue(demo.source);
+  handleShaderChange(demo.source, parseResult, { demoId: demo.id });
+
+  if (parseResult.ok) {
+    editor.setStatus("Compiled", "ok");
+    editor.setLog(`Loaded demo: ${demo.label}.`);
+    preview.setStatus("Rendering", "ok");
+  } else {
+    editor.setStatus("Parse issue", "error");
+    editor.setLog(parseResult.diagnostics.map((d) => `• ${d.message}`).join("\n"), "error");
+    preview.setStatus("Waiting for valid shader", "error");
+  }
 }
 
 function handleDiagnostics(parseResult) {
@@ -101,6 +151,23 @@ function handleCompile(result) {
     editor.setStatus("Compile error", "error");
     editor.setLog(result.log, "error");
     preview.setStatus("Compile error", "error");
+  }
+}
+
+function syncDemoSelection(source, preferredDemoId) {
+  if (preferredDemoId) {
+    state.selectedDemoId = preferredDemoId;
+    headerBar.setSelectedDemo(preferredDemoId);
+    return;
+  }
+
+  const matchedDemo = shaderDemos.find((demo) => demo.source === source);
+  if (matchedDemo) {
+    state.selectedDemoId = matchedDemo.id;
+    headerBar.setSelectedDemo(matchedDemo.id);
+  } else {
+    state.selectedDemoId = null;
+    headerBar.setSelectedDemo(null);
   }
 }
 
